@@ -11,6 +11,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     var popover: NSPopover?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        NSApp.setActivationPolicy(.accessory)
         setupOverlayWindow()
         setupMouseMonitors()
         setupMenuBar()
