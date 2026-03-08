@@ -45,7 +45,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 x: event.locationInWindow.x,
                 y: screen.frame.height - event.locationInWindow.y
             )
-            Task { @MainActor in
+            DispatchQueue.main.async {
                 tracker.updatePosition(point)
             }
         }
@@ -58,7 +58,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 x: event.locationInWindow.x,
                 y: screen.frame.height - event.locationInWindow.y
             )
-            Task { @MainActor in
+            DispatchQueue.main.async {
                 tracker.addClick(at: point)
             }
         }

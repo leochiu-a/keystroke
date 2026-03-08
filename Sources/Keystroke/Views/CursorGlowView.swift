@@ -22,6 +22,7 @@ struct CursorGlowView: View {
             }
         }
         .position(position)
+        .animation(nil, value: position)
         .allowsHitTesting(false)
     }
 
