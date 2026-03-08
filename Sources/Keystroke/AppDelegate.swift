@@ -3,7 +3,7 @@ import SwiftUI
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    var overlayWindow: NSWindow?
+    var overlayWindows: [NSWindow] = []
     var controlPanelWindow: NSWindow?
     let mouseTracker = MouseTracker()
     var mouseMovedMonitor: Any?
@@ -11,55 +11,49 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
-        setupOverlayWindow()
+        setupOverlayWindows()
         setupMouseMonitors()
         setupControlPanel()
     }
 
-    private func setupOverlayWindow() {
-        guard let screen = NSScreen.main else { return }
-
-        let window = NSWindow(
-            contentRect: screen.frame,
-            styleMask: .borderless,
-            backing: .buffered,
-            defer: false
-        )
-        window.level = .screenSaver
-        window.isOpaque = false
-        window.backgroundColor = .clear
-        window.ignoresMouseEvents = true
-        window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-        window.contentView = NSHostingView(rootView: OverlayView(tracker: mouseTracker))
-        window.orderFrontRegardless()
-
-        overlayWindow = window
+    private func setupOverlayWindows() {
+        for screen in NSScreen.screens {
+            let window = NSWindow(
+                contentRect: screen.frame,
+                styleMask: .borderless,
+                backing: .buffered,
+                defer: false
+            )
+            window.level = .screenSaver
+            window.isOpaque = false
+            window.backgroundColor = .clear
+            window.ignoresMouseEvents = true
+            window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+            window.contentView = NSHostingView(
+                rootView: OverlayView(tracker: mouseTracker, screenFrame: screen.frame)
+            )
+            window.setFrame(screen.frame, display: true)
+            window.orderFrontRegardless()
+            overlayWindows.append(window)
+        }
     }
 
     private func setupMouseMonitors() {
         let tracker = mouseTracker
 
-        mouseMovedMonitor = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { event in
-            guard let screen = NSScreen.main else { return }
-            let point = CGPoint(
-                x: event.locationInWindow.x,
-                y: screen.frame.height - event.locationInWindow.y
-            )
+        mouseMovedMonitor = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { _ in
+            let mouseLocation = NSEvent.mouseLocation
             DispatchQueue.main.async {
-                tracker.updatePosition(point)
+                tracker.updatePosition(mouseLocation)
             }
         }
 
         mouseClickMonitor = NSEvent.addGlobalMonitorForEvents(
             matching: [.leftMouseDown, .rightMouseDown]
-        ) { event in
-            guard let screen = NSScreen.main else { return }
-            let point = CGPoint(
-                x: event.locationInWindow.x,
-                y: screen.frame.height - event.locationInWindow.y
-            )
+        ) { _ in
+            let mouseLocation = NSEvent.mouseLocation
             DispatchQueue.main.async {
-                tracker.addClick(at: point)
+                tracker.addClick(at: mouseLocation)
             }
         }
     }

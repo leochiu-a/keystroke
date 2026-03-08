@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct RippleView: View {
-    let click: ClickEvent
+    let position: CGPoint
     let onComplete: () -> Void
 
     @State private var scale: CGFloat = 0.3
@@ -12,7 +12,7 @@ struct RippleView: View {
             .stroke(Color.white.opacity(opacity), lineWidth: 2)
             .frame(width: 80, height: 80)
             .scaleEffect(scale)
-            .position(click.position)
+            .position(position)
             .allowsHitTesting(false)
             .onAppear {
                 withAnimation(.easeOut(duration: 0.5)) {
