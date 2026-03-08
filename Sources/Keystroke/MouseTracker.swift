@@ -16,4 +16,8 @@ final class MouseTracker: ObservableObject {
         guard isEnabled else { return }
         clicks.append(ClickEvent(position: position))
     }
+
+    func removeClick(id: UUID) {
+        clicks.removeAll { $0.id == id }
+    }
 }

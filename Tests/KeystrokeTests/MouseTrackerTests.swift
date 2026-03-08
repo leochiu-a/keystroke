@@ -36,3 +36,21 @@ import Foundation
     tracker.addClick(at: CGPoint(x: 10, y: 20))
     #expect(tracker.clicks.isEmpty)
 }
+
+@Test @MainActor func removeClick() {
+    let tracker = MouseTracker()
+    tracker.addClick(at: .zero)
+    let clickId = tracker.clicks.first!.id
+    tracker.removeClick(id: clickId)
+    #expect(tracker.clicks.isEmpty)
+}
+
+@Test @MainActor func removeClickOnlyRemovesTarget() {
+    let tracker = MouseTracker()
+    tracker.addClick(at: CGPoint(x: 1, y: 1))
+    tracker.addClick(at: CGPoint(x: 2, y: 2))
+    let firstId = tracker.clicks.first!.id
+    tracker.removeClick(id: firstId)
+    #expect(tracker.clicks.count == 1)
+    #expect(tracker.clicks.first?.position == CGPoint(x: 2, y: 2))
+}
