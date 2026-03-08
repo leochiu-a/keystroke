@@ -66,27 +66,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func setupControlPanel() {
         let panelView = ControlPanelView(tracker: mouseTracker)
+            .background(.ultraThinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
         let hostingView = NSHostingView(rootView: panelView)
-        hostingView.frame = NSRect(x: 0, y: 0, width: 200, height: 200)
 
         let window = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 200, height: 200),
-            styleMask: [.titled, .closable, .utilityWindow, .nonactivatingPanel],
+            contentRect: NSRect(x: 0, y: 0, width: 220, height: 320),
+            styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
         )
-        window.title = "Keystroke"
         window.level = .floating
         window.isOpaque = false
-        window.backgroundColor = NSColor.windowBackgroundColor
+        window.backgroundColor = .clear
+        window.hasShadow = true
         window.contentView = hostingView
         window.isMovableByWindowBackground = true
         window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
 
         // Position at top-right corner of screen
         if let screen = NSScreen.main {
-            let x = screen.visibleFrame.maxX - 220
-            let y = screen.visibleFrame.maxY - 220
+            let x = screen.visibleFrame.maxX - 240
+            let y = screen.visibleFrame.maxY - 340
             window.setFrameOrigin(NSPoint(x: x, y: y))
         }
 
