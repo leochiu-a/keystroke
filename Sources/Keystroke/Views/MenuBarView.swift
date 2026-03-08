@@ -12,8 +12,7 @@ struct ControlPanelView: View {
 
     private let styles: [(String, HighlightStyle)] = [
         ("Glow", .glow),
-        ("Neon Ring", .neonRing),
-        ("Ring", .transparentRing),
+        ("Ring", .ring),
     ]
 
     var body: some View {

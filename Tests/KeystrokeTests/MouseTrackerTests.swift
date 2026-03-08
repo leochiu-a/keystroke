@@ -14,18 +14,15 @@ import Foundation
 
 @Test func highlightStyleHasAllCases() {
     let allCases = HighlightStyle.allCases
-    #expect(allCases.count == 3)
+    #expect(allCases.count == 2)
     #expect(allCases.contains(.glow))
-    #expect(allCases.contains(.neonRing))
-    #expect(allCases.contains(.transparentRing))
+    #expect(allCases.contains(.ring))
 }
 
 @Test @MainActor func setHighlightStyle() {
     let tracker = MouseTracker()
-    tracker.highlightStyle = .neonRing
-    #expect(tracker.highlightStyle == .neonRing)
-    tracker.highlightStyle = .transparentRing
-    #expect(tracker.highlightStyle == .transparentRing)
+    tracker.highlightStyle = .ring
+    #expect(tracker.highlightStyle == .ring)
 }
 
 @Test @MainActor func updatePosition() {
