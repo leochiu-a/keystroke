@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct MenuBarView: View {
+struct ControlPanelView: View {
     @ObservedObject var tracker: MouseTracker
 
     private let colors: [(String, Color)] = [
@@ -12,6 +12,12 @@ struct MenuBarView: View {
 
     var body: some View {
         VStack(spacing: 12) {
+            HStack {
+                Text("Keystroke")
+                    .font(.headline)
+                Spacer()
+            }
+
             Toggle("Enabled", isOn: $tracker.isEnabled)
                 .toggleStyle(.switch)
 
@@ -44,6 +50,6 @@ struct MenuBarView: View {
             }
         }
         .padding()
-        .frame(width: 180)
+        .frame(width: 200)
     }
 }

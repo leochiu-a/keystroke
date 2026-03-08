@@ -4,17 +4,16 @@ import SwiftUI
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     var overlayWindow: NSWindow?
+    var controlPanelWindow: NSWindow?
     let mouseTracker = MouseTracker()
     var mouseMovedMonitor: Any?
     var mouseClickMonitor: Any?
-    var statusItem: NSStatusItem?
-    var popover: NSPopover?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
         setupOverlayWindow()
         setupMouseMonitors()
-        setupMenuBar()
+        setupControlPanel()
     }
 
     private func setupOverlayWindow() {
@@ -65,28 +64,34 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    private func setupMenuBar() {
-        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        if let button = statusItem?.button {
-            button.image = NSImage(systemSymbolName: "cursor.rays", accessibilityDescription: "Keystroke")
-            button.action = #selector(togglePopover(_:))
-            button.target = self
+    private func setupControlPanel() {
+        let panelView = ControlPanelView(tracker: mouseTracker)
+        let hostingView = NSHostingView(rootView: panelView)
+        hostingView.frame = NSRect(x: 0, y: 0, width: 200, height: 200)
+
+        let window = NSPanel(
+            contentRect: NSRect(x: 0, y: 0, width: 200, height: 200),
+            styleMask: [.titled, .closable, .utilityWindow, .nonactivatingPanel],
+            backing: .buffered,
+            defer: false
+        )
+        window.title = "Keystroke"
+        window.level = .floating
+        window.isOpaque = false
+        window.backgroundColor = NSColor.windowBackgroundColor
+        window.contentView = hostingView
+        window.isMovableByWindowBackground = true
+        window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+
+        // Position at top-right corner of screen
+        if let screen = NSScreen.main {
+            let x = screen.visibleFrame.maxX - 220
+            let y = screen.visibleFrame.maxY - 220
+            window.setFrameOrigin(NSPoint(x: x, y: y))
         }
 
-        let pop = NSPopover()
-        pop.contentSize = NSSize(width: 180, height: 160)
-        pop.behavior = .transient
-        pop.contentViewController = NSHostingController(rootView: MenuBarView(tracker: mouseTracker))
-        popover = pop
-    }
-
-    @objc func togglePopover(_ sender: AnyObject?) {
-        guard let popover, let button = statusItem?.button else { return }
-        if popover.isShown {
-            popover.performClose(sender)
-        } else {
-            popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
-        }
+        window.orderFrontRegardless()
+        controlPanelWindow = window
     }
 
     func applicationWillTerminate(_ notification: Notification) {
