@@ -6,7 +6,7 @@ struct OverlayView: View {
     var body: some View {
         ZStack {
             if tracker.isEnabled {
-                CursorGlowView(position: tracker.cursorPosition, color: tracker.glowColor)
+                CursorGlowView(position: tracker.cursorPosition, color: tracker.glowColor, style: tracker.highlightStyle)
 
                 ForEach(tracker.clicks) { click in
                     RippleView(click: click) {

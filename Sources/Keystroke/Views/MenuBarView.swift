@@ -10,6 +10,12 @@ struct ControlPanelView: View {
         ("Pink", .pink),
     ]
 
+    private let styles: [(String, HighlightStyle)] = [
+        ("Glow", .glow),
+        ("Neon Ring", .neonRing),
+        ("Ring", .transparentRing),
+    ]
+
     var body: some View {
         VStack(spacing: 12) {
             HStack {
@@ -23,7 +29,21 @@ struct ControlPanelView: View {
 
             Divider()
 
-            Text("Glow Color")
+            Text("Style")
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            Picker("Style", selection: $tracker.highlightStyle) {
+                ForEach(styles, id: \.1) { name, style in
+                    Text(name).tag(style)
+                }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+
+            Divider()
+
+            Text("Color")
                 .font(.caption)
                 .foregroundColor(.secondary)
 

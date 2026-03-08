@@ -7,6 +7,25 @@ import Foundation
     #expect(tracker.cursorPosition == .zero)
     #expect(tracker.clicks.isEmpty)
     #expect(tracker.isEnabled == true)
+    #expect(tracker.highlightStyle == .glow)
+}
+
+// MARK: - HighlightStyle
+
+@Test func highlightStyleHasAllCases() {
+    let allCases = HighlightStyle.allCases
+    #expect(allCases.count == 3)
+    #expect(allCases.contains(.glow))
+    #expect(allCases.contains(.neonRing))
+    #expect(allCases.contains(.transparentRing))
+}
+
+@Test @MainActor func setHighlightStyle() {
+    let tracker = MouseTracker()
+    tracker.highlightStyle = .neonRing
+    #expect(tracker.highlightStyle == .neonRing)
+    tracker.highlightStyle = .transparentRing
+    #expect(tracker.highlightStyle == .transparentRing)
 }
 
 @Test @MainActor func updatePosition() {
