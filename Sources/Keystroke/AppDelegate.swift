@@ -7,10 +7,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let mouseTracker = MouseTracker()
     var mouseMovedMonitor: Any?
     var mouseClickMonitor: Any?
+    var statusItem: NSStatusItem?
+    var popover: NSPopover?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         setupOverlayWindow()
         setupMouseMonitors()
+        setupMenuBar()
     }
 
     private func setupOverlayWindow() {
@@ -58,6 +61,30 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             Task { @MainActor in
                 tracker.addClick(at: point)
             }
+        }
+    }
+
+    private func setupMenuBar() {
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        if let button = statusItem?.button {
+            button.image = NSImage(systemSymbolName: "cursor.rays", accessibilityDescription: "Keystroke")
+            button.action = #selector(togglePopover(_:))
+            button.target = self
+        }
+
+        let pop = NSPopover()
+        pop.contentSize = NSSize(width: 180, height: 160)
+        pop.behavior = .transient
+        pop.contentViewController = NSHostingController(rootView: MenuBarView(tracker: mouseTracker))
+        popover = pop
+    }
+
+    @objc func togglePopover(_ sender: AnyObject?) {
+        guard let popover, let button = statusItem?.button else { return }
+        if popover.isShown {
+            popover.performClose(sender)
+        } else {
+            popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         }
     }
 
