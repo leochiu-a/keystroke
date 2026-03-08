@@ -6,4 +6,14 @@ final class MouseTracker: ObservableObject {
     @Published var clicks: [ClickEvent] = []
     @Published var isEnabled: Bool = true
     @Published var glowColor: Color = .yellow
+
+    func updatePosition(_ point: CGPoint) {
+        guard isEnabled else { return }
+        cursorPosition = point
+    }
+
+    func addClick(at position: CGPoint) {
+        guard isEnabled else { return }
+        clicks.append(ClickEvent(position: position))
+    }
 }
