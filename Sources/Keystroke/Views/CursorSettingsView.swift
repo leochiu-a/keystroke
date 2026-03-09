@@ -43,7 +43,9 @@ struct CursorSettingsView: View {
                                 label: "Glow",
                                 style: .glow,
                                 isSelected: tracker.highlightStyle == .glow,
-                                color: tracker.glowColor
+                                color: tracker.glowColor,
+                                size: tracker.cursorSize,
+                                ringWidth: tracker.ringWidth
                             ) {
                                 tracker.highlightStyle = .glow
                             }
@@ -52,7 +54,9 @@ struct CursorSettingsView: View {
                                 label: "Ring",
                                 style: .ring,
                                 isSelected: tracker.highlightStyle == .ring,
-                                color: tracker.glowColor
+                                color: tracker.glowColor,
+                                size: tracker.cursorSize,
+                                ringWidth: tracker.ringWidth
                             ) {
                                 tracker.highlightStyle = .ring
                             }
@@ -81,6 +85,42 @@ struct CursorSettingsView: View {
                         }
                     }
                 }
+
+                // Size card
+                SettingsCard {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("SIZE")
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundStyle(.secondary)
+                            .tracking(0.5)
+
+                        HStack {
+                            Slider(value: $tracker.cursorSize, in: 20...100, step: 1)
+                            Text("\(Int(tracker.cursorSize))")
+                                .font(.system(size: 12, weight: .medium, design: .monospaced))
+                                .foregroundStyle(.secondary)
+                                .frame(width: 30, alignment: .trailing)
+                        }
+                    }
+                }
+
+                // Ring width card
+                SettingsCard {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("RING WIDTH")
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundStyle(.secondary)
+                            .tracking(0.5)
+
+                        HStack {
+                            Slider(value: $tracker.ringWidth, in: 1...15, step: 0.5)
+                            Text(String(format: "%.1f", tracker.ringWidth))
+                                .font(.system(size: 12, weight: .medium, design: .monospaced))
+                                .foregroundStyle(.secondary)
+                                .frame(width: 30, alignment: .trailing)
+                        }
+                    }
+                }
             }
             .padding(28)
         }
@@ -95,6 +135,8 @@ private struct StylePreviewButton: View {
     let style: HighlightStyle
     let isSelected: Bool
     let color: Color
+    let size: CGFloat
+    let ringWidth: CGFloat
     let action: () -> Void
 
     var body: some View {
@@ -107,7 +149,9 @@ private struct StylePreviewButton: View {
                         CursorGlowView(
                             position: CGPoint(x: geo.size.width / 2, y: geo.size.height / 2),
                             color: color,
-                            style: style
+                            style: style,
+                            size: size,
+                            ringWidth: ringWidth
                         )
                     }
                 }

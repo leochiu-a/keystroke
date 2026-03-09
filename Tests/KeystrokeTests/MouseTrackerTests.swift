@@ -61,6 +61,30 @@ import Foundation
     #expect(tracker.clicks.isEmpty)
 }
 
+// MARK: - Cursor size and ring width
+
+@Test @MainActor func cursorSizeDefaultValue() {
+    let tracker = MouseTracker()
+    #expect(tracker.cursorSize == 40.0)
+}
+
+@Test @MainActor func setCursorSize() {
+    let tracker = MouseTracker()
+    tracker.cursorSize = 60.0
+    #expect(tracker.cursorSize == 60.0)
+}
+
+@Test @MainActor func ringWidthDefaultValue() {
+    let tracker = MouseTracker()
+    #expect(tracker.ringWidth == 5.0)
+}
+
+@Test @MainActor func setRingWidth() {
+    let tracker = MouseTracker()
+    tracker.ringWidth = 8.0
+    #expect(tracker.ringWidth == 8.0)
+}
+
 @Test @MainActor func removeClickOnlyRemovesTarget() {
     let tracker = MouseTracker()
     tracker.addClick(at: CGPoint(x: 1, y: 1))

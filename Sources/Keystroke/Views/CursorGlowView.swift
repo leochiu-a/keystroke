@@ -4,13 +4,10 @@ struct CursorGlowView: View {
     let position: CGPoint
     let color: Color
     let style: HighlightStyle
+    let size: CGFloat
+    let ringWidth: CGFloat
 
-    private var size: CGFloat {
-        switch style {
-        case .glow: return 80
-        case .ring: return 40
-        }
-    }
+    private var glowSize: CGFloat { size * 2 }
 
     var body: some View {
         Group {
@@ -33,15 +30,15 @@ struct CursorGlowView: View {
                     gradient: Gradient(colors: [color.opacity(0.5), color.opacity(0.0)]),
                     center: .center,
                     startRadius: 0,
-                    endRadius: size / 2
+                    endRadius: glowSize / 2
                 )
             )
-            .frame(width: size, height: size)
+            .frame(width: glowSize, height: glowSize)
     }
 
     private var ringStyle: some View {
         Circle()
-            .stroke(color.opacity(0.7), lineWidth: 3)
+            .stroke(color.opacity(0.7), lineWidth: ringWidth)
             .frame(width: size, height: size)
     }
 }

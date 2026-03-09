@@ -7,6 +7,8 @@ final class MouseTracker: ObservableObject {
     @Published var isEnabled: Bool = true
     @Published var glowColor: Color = .yellow
     @Published var highlightStyle: HighlightStyle = .glow
+    @Published var cursorSize: CGFloat = 40.0
+    @Published var ringWidth: CGFloat = 5.0
 
     func updatePosition(_ point: CGPoint) {
         guard isEnabled else { return }
