@@ -105,26 +105,49 @@ import AppKit
     #expect(result == "⌦")
 }
 
+// MARK: - addKeyPress with label
+
+@Test @MainActor func addKeyPressWithLabel() {
+    let tracker = KeyPressTracker()
+    tracker.addKeyPress(characters: "⌘", label: "command")
+    #expect(tracker.keyPresses.first?.characters == "⌘")
+    #expect(tracker.keyPresses.first?.label == "command")
+}
+
+@Test @MainActor func addKeyPressWithoutLabel() {
+    let tracker = KeyPressTracker()
+    tracker.addKeyPress(characters: "A")
+    #expect(tracker.keyPresses.first?.label == nil)
+}
+
 // MARK: - Modifier-only key detection
 
 @Test @MainActor func formatModifierChangeCommand() {
     let result = KeyPressTracker.formatModifierChange(oldFlags: [], newFlags: .command)
-    #expect(result == "⌘")
+    #expect(result?.count == 1)
+    #expect(result?.first?.symbol == "⌘")
+    #expect(result?.first?.label == "command")
 }
 
 @Test @MainActor func formatModifierChangeShift() {
     let result = KeyPressTracker.formatModifierChange(oldFlags: [], newFlags: .shift)
-    #expect(result == "⇧")
+    #expect(result?.count == 1)
+    #expect(result?.first?.symbol == "⇧")
+    #expect(result?.first?.label == "shift")
 }
 
 @Test @MainActor func formatModifierChangeOption() {
     let result = KeyPressTracker.formatModifierChange(oldFlags: [], newFlags: .option)
-    #expect(result == "⌥")
+    #expect(result?.count == 1)
+    #expect(result?.first?.symbol == "⌥")
+    #expect(result?.first?.label == "option")
 }
 
 @Test @MainActor func formatModifierChangeControl() {
     let result = KeyPressTracker.formatModifierChange(oldFlags: [], newFlags: .control)
-    #expect(result == "⌃")
+    #expect(result?.count == 1)
+    #expect(result?.first?.symbol == "⌃")
+    #expect(result?.first?.label == "control")
 }
 
 @Test @MainActor func formatModifierChangeReleaseReturnsNil() {
@@ -133,6 +156,10 @@ import AppKit
 }
 
 @Test @MainActor func formatModifierChangeMultipleNewModifiers() {
-    let result = KeyPressTracker.formatModifierChange(oldFlags: .command, newFlags: [.command, .shift])
-    #expect(result == "⇧")
+    let result = KeyPressTracker.formatModifierChange(oldFlags: [], newFlags: [.command, .shift])
+    #expect(result?.count == 2)
+    #expect(result?[0].symbol == "⌘")
+    #expect(result?[0].label == "command")
+    #expect(result?[1].symbol == "⇧")
+    #expect(result?[1].label == "shift")
 }

@@ -101,8 +101,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             MainActor.assumeIsolated {
                 guard let self else { return }
                 let newFlags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
-                if let formatted = KeyPressTracker.formatModifierChange(oldFlags: self.previousModifierFlags, newFlags: newFlags) {
-                    tracker.addKeyPress(characters: formatted)
+                if let modifiers = KeyPressTracker.formatModifierChange(oldFlags: self.previousModifierFlags, newFlags: newFlags) {
+                    for mod in modifiers {
+                        tracker.addKeyPress(characters: mod.symbol, label: mod.label)
+                    }
                 }
                 self.previousModifierFlags = newFlags
             }

@@ -1,5 +1,10 @@
 import AppKit
 
+struct ModifierInfo {
+    let symbol: String
+    let label: String
+}
+
 @MainActor
 final class KeyPressTracker: ObservableObject {
     @Published var keyPresses: [KeyPressEvent] = []
@@ -18,29 +23,34 @@ final class KeyPressTracker: ObservableObject {
         126: "↑",   // Arrow Up
     ]
 
+    private static let modifiers: [(flag: NSEvent.ModifierFlags, symbol: String, label: String)] = [
+        (.control, "⌃", "control"),
+        (.option, "⌥", "option"),
+        (.command, "⌘", "command"),
+        (.shift, "⇧", "shift"),
+    ]
+
     private static let maxVisibleKeyPresses = 15
 
-    func addKeyPress(characters: String) {
+    func addKeyPress(characters: String, label: String? = nil) {
         guard isEnabled else { return }
         if keyPresses.count >= Self.maxVisibleKeyPresses {
             keyPresses.removeFirst()
         }
-        keyPresses.append(KeyPressEvent(characters: characters))
+        keyPresses.append(KeyPressEvent(characters: characters, label: label))
     }
 
     func removeKeyPress(id: UUID) {
         keyPresses.removeAll { $0.id == id }
     }
 
-    static func formatModifierChange(oldFlags: NSEvent.ModifierFlags, newFlags: NSEvent.ModifierFlags) -> String? {
+    static func formatModifierChange(oldFlags: NSEvent.ModifierFlags, newFlags: NSEvent.ModifierFlags) -> [ModifierInfo]? {
         let pressed = newFlags.subtracting(oldFlags)
         if pressed.isEmpty { return nil }
 
-        var result = ""
-        if pressed.contains(.control) { result += "⌃" }
-        if pressed.contains(.option) { result += "⌥" }
-        if pressed.contains(.command) { result += "⌘" }
-        if pressed.contains(.shift) { result += "⇧" }
+        let result = modifiers
+            .filter { pressed.contains($0.flag) }
+            .map { ModifierInfo(symbol: $0.symbol, label: $0.label) }
 
         return result.isEmpty ? nil : result
     }
@@ -54,10 +64,9 @@ final class KeyPressTracker: ObservableObject {
         }
 
         var prefix = ""
-        if modifiers.contains(.control) { prefix += "⌃" }
-        if modifiers.contains(.option) { prefix += "⌥" }
-        if modifiers.contains(.command) { prefix += "⌘" }
-        if modifiers.contains(.shift) { prefix += "⇧" }
+        for mod in self.modifiers where modifiers.contains(mod.flag) {
+            prefix += mod.symbol
+        }
 
         return prefix + keyStr
     }

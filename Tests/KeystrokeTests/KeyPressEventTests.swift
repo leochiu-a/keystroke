@@ -14,3 +14,14 @@ import Foundation
     let b = KeyPressEvent(characters: "A")
     #expect(a.id != b.id)
 }
+
+@Test func keyPressEventLabelDefaultsToNil() {
+    let event = KeyPressEvent(characters: "A")
+    #expect(event.label == nil)
+}
+
+@Test func keyPressEventStoresLabel() {
+    let event = KeyPressEvent(characters: "⌘", label: "command")
+    #expect(event.characters == "⌘")
+    #expect(event.label == "command")
+}
