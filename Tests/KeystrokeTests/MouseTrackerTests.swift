@@ -7,22 +7,7 @@ import Foundation
     #expect(tracker.cursorPosition == .zero)
     #expect(tracker.clicks.isEmpty)
     #expect(tracker.isEnabled == true)
-    #expect(tracker.highlightStyle == .glow)
-}
-
-// MARK: - HighlightStyle
-
-@Test func highlightStyleHasAllCases() {
-    let allCases = HighlightStyle.allCases
-    #expect(allCases.count == 2)
-    #expect(allCases.contains(.glow))
-    #expect(allCases.contains(.ring))
-}
-
-@Test @MainActor func setHighlightStyle() {
-    let tracker = MouseTracker()
-    tracker.highlightStyle = .ring
-    #expect(tracker.highlightStyle == .ring)
+    #expect(tracker.glowRadius == 0.0)
 }
 
 @Test @MainActor func updatePosition() {
@@ -61,7 +46,17 @@ import Foundation
     #expect(tracker.clicks.isEmpty)
 }
 
-// MARK: - Cursor size and ring width
+@Test @MainActor func removeClickOnlyRemovesTarget() {
+    let tracker = MouseTracker()
+    tracker.addClick(at: CGPoint(x: 1, y: 1))
+    tracker.addClick(at: CGPoint(x: 2, y: 2))
+    let firstId = tracker.clicks.first!.id
+    tracker.removeClick(id: firstId)
+    #expect(tracker.clicks.count == 1)
+    #expect(tracker.clicks.first?.position == CGPoint(x: 2, y: 2))
+}
+
+// MARK: - Cursor size, ring width, and glow radius
 
 @Test @MainActor func cursorSizeDefaultValue() {
     let tracker = MouseTracker()
@@ -85,12 +80,13 @@ import Foundation
     #expect(tracker.ringWidth == 8.0)
 }
 
-@Test @MainActor func removeClickOnlyRemovesTarget() {
+@Test @MainActor func glowRadiusDefaultValue() {
     let tracker = MouseTracker()
-    tracker.addClick(at: CGPoint(x: 1, y: 1))
-    tracker.addClick(at: CGPoint(x: 2, y: 2))
-    let firstId = tracker.clicks.first!.id
-    tracker.removeClick(id: firstId)
-    #expect(tracker.clicks.count == 1)
-    #expect(tracker.clicks.first?.position == CGPoint(x: 2, y: 2))
+    #expect(tracker.glowRadius == 0.0)
+}
+
+@Test @MainActor func setGlowRadius() {
+    let tracker = MouseTracker()
+    tracker.glowRadius = 30.0
+    #expect(tracker.glowRadius == 30.0)
 }

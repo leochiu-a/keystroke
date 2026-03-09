@@ -30,37 +30,29 @@ struct CursorSettingsView: View {
                         .foregroundStyle(.secondary)
                 }
 
-                // Style card
+                // Preview card
                 SettingsCard {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("STYLE")
+                        Text("PREVIEW")
                             .font(.system(size: 10, weight: .medium))
                             .foregroundStyle(.secondary)
                             .tracking(0.5)
 
-                        HStack(spacing: 10) {
-                            StylePreviewButton(
-                                label: "Glow",
-                                style: .glow,
-                                isSelected: tracker.highlightStyle == .glow,
-                                color: tracker.glowColor,
-                                size: tracker.cursorSize,
-                                ringWidth: tracker.ringWidth
-                            ) {
-                                tracker.highlightStyle = .glow
-                            }
+                        GeometryReader { geo in
+                            ZStack {
+                                Color(nsColor: .separatorColor).opacity(0.08)
 
-                            StylePreviewButton(
-                                label: "Ring",
-                                style: .ring,
-                                isSelected: tracker.highlightStyle == .ring,
-                                color: tracker.glowColor,
-                                size: tracker.cursorSize,
-                                ringWidth: tracker.ringWidth
-                            ) {
-                                tracker.highlightStyle = .ring
+                                CursorGlowView(
+                                    position: CGPoint(x: geo.size.width / 2, y: geo.size.height / 2),
+                                    color: tracker.glowColor,
+                                    size: tracker.cursorSize,
+                                    ringWidth: tracker.ringWidth,
+                                    glowRadius: tracker.glowRadius
+                                )
                             }
                         }
+                        .frame(height: 100)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
                 }
 
@@ -121,6 +113,24 @@ struct CursorSettingsView: View {
                         }
                     }
                 }
+
+                // Glow radius card
+                SettingsCard {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("GLOW RANGE")
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundStyle(.secondary)
+                            .tracking(0.5)
+
+                        HStack {
+                            Slider(value: $tracker.glowRadius, in: 0...50, step: 1)
+                            Text("\(Int(tracker.glowRadius))")
+                                .font(.system(size: 12, weight: .medium, design: .monospaced))
+                                .foregroundStyle(.secondary)
+                                .frame(width: 30, alignment: .trailing)
+                        }
+                    }
+                }
             }
             .padding(28)
         }
@@ -129,57 +139,6 @@ struct CursorSettingsView: View {
 }
 
 // MARK: - Subcomponents
-
-private struct StylePreviewButton: View {
-    let label: String
-    let style: HighlightStyle
-    let isSelected: Bool
-    let color: Color
-    let size: CGFloat
-    let ringWidth: CGFloat
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 0) {
-                GeometryReader { geo in
-                    ZStack {
-                        Color(nsColor: .separatorColor).opacity(0.08)
-
-                        CursorGlowView(
-                            position: CGPoint(x: geo.size.width / 2, y: geo.size.height / 2),
-                            color: color,
-                            style: style,
-                            size: size,
-                            ringWidth: ringWidth
-                        )
-                    }
-                }
-                .frame(height: 80)
-                .clipped()
-
-                Text(label)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(isSelected ? .primary : .secondary)
-                    .padding(.vertical, 8)
-            }
-            .frame(maxWidth: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(isSelected ? color.opacity(0.08) : Color(nsColor: .controlBackgroundColor))
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(
-                        isSelected ? color.opacity(0.5) : Color(nsColor: .separatorColor).opacity(0.3),
-                        lineWidth: isSelected ? 2 : 1
-                    )
-            )
-        }
-        .buttonStyle(.plain)
-    }
-}
 
 private struct ColorDot: View {
     let color: Color

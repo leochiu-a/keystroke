@@ -22,7 +22,7 @@ struct OverlayView: View {
     var body: some View {
         ZStack {
             if mouseTracker.isEnabled && isCursorOnThisScreen {
-                CursorGlowView(position: localCursorPosition, color: mouseTracker.glowColor, style: mouseTracker.highlightStyle, size: mouseTracker.cursorSize, ringWidth: mouseTracker.ringWidth)
+                CursorGlowView(position: localCursorPosition, color: mouseTracker.glowColor, size: mouseTracker.cursorSize, ringWidth: mouseTracker.ringWidth, glowRadius: mouseTracker.glowRadius)
 
                 ForEach(mouseTracker.clicks) { click in
                     if CoordinateHelper.isPointOnScreen(mouseLocation: click.position, screenFrame: screenFrame) {
