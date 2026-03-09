@@ -4,16 +4,16 @@ import SwiftUI
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     var overlayWindows: [NSWindow] = []
-    var controlPanelWindow: NSWindow?
+    var mainWindow: NSWindow?
     let mouseTracker = MouseTracker()
     var mouseMovedMonitor: Any?
     var mouseClickMonitor: Any?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        NSApp.setActivationPolicy(.accessory)
+        NSApp.setActivationPolicy(.regular)
         setupOverlayWindows()
         setupMouseMonitors()
-        setupControlPanel()
+        setupMainWindow()
     }
 
     private func setupOverlayWindows() {
@@ -60,35 +60,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    private func setupControlPanel() {
-        let panelView = ControlPanelView(tracker: mouseTracker)
-            .background(.ultraThinMaterial)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-        let hostingView = NSHostingView(rootView: panelView)
+    private func setupMainWindow() {
+        let mainView = MainWindowView(tracker: mouseTracker)
+        let hostingView = NSHostingView(rootView: mainView)
 
-        let window = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 220, height: 320),
-            styleMask: [.borderless, .nonactivatingPanel],
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 700, height: 480),
+            styleMask: [.titled, .closable, .miniaturizable, .resizable],
             backing: .buffered,
             defer: false
         )
-        window.level = .floating
-        window.isOpaque = false
-        window.backgroundColor = .clear
-        window.hasShadow = true
+        window.title = "Keystroke"
         window.contentView = hostingView
-        window.isMovableByWindowBackground = true
-        window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+        window.contentMinSize = NSSize(width: 550, height: 400)
+        window.center()
+        window.makeKeyAndOrderFront(nil)
 
-        // Position at top-right corner of screen
-        if let screen = NSScreen.main {
-            let x = screen.visibleFrame.maxX - 240
-            let y = screen.visibleFrame.maxY - 340
-            window.setFrameOrigin(NSPoint(x: x, y: y))
-        }
-
-        window.orderFrontRegardless()
-        controlPanelWindow = window
+        mainWindow = window
     }
 
     func applicationWillTerminate(_ notification: Notification) {
