@@ -18,8 +18,13 @@ final class KeyPressTracker: ObservableObject {
         126: "↑",   // Arrow Up
     ]
 
+    private static let maxVisibleKeyPresses = 15
+
     func addKeyPress(characters: String) {
         guard isEnabled else { return }
+        if keyPresses.count >= Self.maxVisibleKeyPresses {
+            keyPresses.removeFirst()
+        }
         keyPresses.append(KeyPressEvent(characters: characters))
     }
 

@@ -37,8 +37,8 @@ struct OverlayView: View {
                 }
             }
 
-            if keyPressTracker.isEnabled {
-                KeyPressOverlayView(tracker: keyPressTracker, screenHeight: screenFrame.height)
+            if keyPressTracker.isEnabled && screenFrame == NSScreen.main?.frame {
+                KeyPressOverlayView(tracker: keyPressTracker)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

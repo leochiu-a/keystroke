@@ -2,7 +2,6 @@ import SwiftUI
 
 struct KeyPressOverlayView: View {
     @ObservedObject var tracker: KeyPressTracker
-    let screenHeight: CGFloat
 
     var body: some View {
         VStack {
