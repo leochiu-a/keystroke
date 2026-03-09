@@ -39,18 +39,18 @@ struct CursorSettingsView: View {
                             .tracking(0.5)
 
                         HStack(spacing: 10) {
-                            StyleCardButton(
+                            StylePreviewButton(
                                 label: "Glow",
-                                icon: "circle.fill",
+                                style: .glow,
                                 isSelected: tracker.highlightStyle == .glow,
                                 color: tracker.glowColor
                             ) {
                                 tracker.highlightStyle = .glow
                             }
 
-                            StyleCardButton(
+                            StylePreviewButton(
                                 label: "Ring",
-                                icon: "circle",
+                                style: .ring,
                                 isSelected: tracker.highlightStyle == .ring,
                                 color: tracker.glowColor
                             ) {
@@ -81,31 +81,6 @@ struct CursorSettingsView: View {
                         }
                     }
                 }
-
-                // Preview card
-                SettingsCard {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("PREVIEW")
-                            .font(.system(size: 10, weight: .medium))
-                            .foregroundStyle(.secondary)
-                            .tracking(0.5)
-
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(Color.black.opacity(0.85))
-                                .frame(height: 120)
-
-                            CursorGlowView(
-                                position: CGPoint(x: 200, y: 60),
-                                color: tracker.glowColor,
-                                style: tracker.highlightStyle
-                            )
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 120)
-                            .clipped()
-                        }
-                    }
-                }
             }
             .padding(28)
         }
@@ -130,34 +105,46 @@ private struct SettingsCard<Content: View>: View {
     }
 }
 
-private struct StyleCardButton: View {
+private struct StylePreviewButton: View {
     let label: String
-    let icon: String
+    let style: HighlightStyle
     let isSelected: Bool
     let color: Color
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 6) {
-                Image(systemName: icon)
-                    .font(.system(size: 22))
-                    .foregroundStyle(isSelected ? color : .secondary)
+            VStack(spacing: 0) {
+                GeometryReader { geo in
+                    ZStack {
+                        Color(nsColor: .separatorColor).opacity(0.08)
+
+                        CursorGlowView(
+                            position: CGPoint(x: geo.size.width / 2, y: geo.size.height / 2),
+                            color: color,
+                            style: style
+                        )
+                    }
+                }
+                .frame(height: 80)
+                .clipped()
+
                 Text(label)
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(isSelected ? .primary : .secondary)
+                    .padding(.vertical, 8)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
             .background(
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(isSelected ? color.opacity(0.12) : Color(nsColor: .controlBackgroundColor))
+                    .fill(isSelected ? color.opacity(0.08) : Color(nsColor: .controlBackgroundColor))
             )
+            .clipShape(RoundedRectangle(cornerRadius: 10))
             .overlay(
                 RoundedRectangle(cornerRadius: 10)
                     .stroke(
-                        isSelected ? color.opacity(0.4) : Color(nsColor: .separatorColor).opacity(0.3),
-                        lineWidth: 1
+                        isSelected ? color.opacity(0.5) : Color(nsColor: .separatorColor).opacity(0.3),
+                        lineWidth: isSelected ? 2 : 1
                     )
             )
         }
@@ -176,11 +163,13 @@ private struct ColorDot: View {
             Circle()
                 .fill(color)
                 .frame(width: 28, height: 28)
-                .overlay(
-                    Circle()
-                        .stroke(Color.accentColor, lineWidth: isSelected ? 2.5 : 0)
-                        .frame(width: 34, height: 34)
-                )
+                .overlay {
+                    if isSelected {
+                        Circle()
+                            .stroke(Color.accentColor, lineWidth: 2.5)
+                            .frame(width: 34, height: 34)
+                    }
+                }
         }
         .buttonStyle(.plain)
         .accessibilityLabel(label)

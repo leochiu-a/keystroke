@@ -73,6 +73,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         window.title = "Keystroke"
         window.contentView = hostingView
         window.contentMinSize = NSSize(width: 550, height: 400)
+        window.appearance = NSAppearance(named: .aqua)
         window.center()
         window.makeKeyAndOrderFront(nil)
 
