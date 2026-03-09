@@ -6,8 +6,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     var overlayWindows: [NSWindow] = []
     var mainWindow: NSWindow?
     let mouseTracker = MouseTracker()
-    var mouseMovedMonitor: Any?
-    var mouseClickMonitor: Any?
+    var globalMouseMovedMonitor: Any?
+    var localMouseMovedMonitor: Any?
+    var globalMouseClickMonitor: Any?
+    var localMouseClickMonitor: Any?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.regular)
@@ -40,23 +42,33 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func setupMouseMonitors() {
         let tracker = mouseTracker
+        let moveEvents: NSEvent.EventTypeMask = [.mouseMoved, .leftMouseDragged, .rightMouseDragged, .otherMouseDragged]
+        let clickEvents: NSEvent.EventTypeMask = [.leftMouseDown, .rightMouseDown]
 
-        mouseMovedMonitor = NSEvent.addGlobalMonitorForEvents(
-            matching: [.mouseMoved, .leftMouseDragged, .rightMouseDragged, .otherMouseDragged]
-        ) { _ in
-            let mouseLocation = NSEvent.mouseLocation
-            Task { @MainActor in
-                tracker.updatePosition(mouseLocation)
+        let handleMove: (NSEvent) -> Void = { _ in
+            MainActor.assumeIsolated {
+                tracker.updatePosition(NSEvent.mouseLocation)
             }
         }
 
-        mouseClickMonitor = NSEvent.addGlobalMonitorForEvents(
-            matching: [.leftMouseDown, .rightMouseDown]
-        ) { _ in
-            let mouseLocation = NSEvent.mouseLocation
-            Task { @MainActor in
-                tracker.addClick(at: mouseLocation)
+        let handleClick: (NSEvent) -> Void = { _ in
+            MainActor.assumeIsolated {
+                tracker.addClick(at: NSEvent.mouseLocation)
             }
+        }
+
+        // Global monitors: events from other apps
+        globalMouseMovedMonitor = NSEvent.addGlobalMonitorForEvents(matching: moveEvents, handler: handleMove)
+        globalMouseClickMonitor = NSEvent.addGlobalMonitorForEvents(matching: clickEvents, handler: handleClick)
+
+        // Local monitors: events within our own app
+        localMouseMovedMonitor = NSEvent.addLocalMonitorForEvents(matching: moveEvents) { event in
+            handleMove(event)
+            return event
+        }
+        localMouseClickMonitor = NSEvent.addLocalMonitorForEvents(matching: clickEvents) { event in
+            handleClick(event)
+            return event
         }
     }
 
@@ -81,7 +93,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
-        if let monitor = mouseMovedMonitor { NSEvent.removeMonitor(monitor) }
-        if let monitor = mouseClickMonitor { NSEvent.removeMonitor(monitor) }
+        for monitor in [globalMouseMovedMonitor, localMouseMovedMonitor, globalMouseClickMonitor, localMouseClickMonitor] {
+            if let monitor { NSEvent.removeMonitor(monitor) }
+        }
     }
 }
