@@ -123,7 +123,7 @@ struct CursorSettingsView: View {
                             .tracking(0.5)
 
                         HStack {
-                            Slider(value: $tracker.glowRadius, in: 0...50, step: 1)
+                            Slider(value: $tracker.glowRadius, in: 0...20, step: 1)
                             Text("\(Int(tracker.glowRadius))")
                                 .font(.system(size: 12, weight: .medium, design: .monospaced))
                                 .foregroundStyle(.secondary)
