@@ -87,7 +87,7 @@ struct CursorSettingsView: View {
                             .tracking(0.5)
 
                         HStack {
-                            Slider(value: $tracker.cursorSize, in: 20...100, step: 1)
+                            Slider(value: $tracker.cursorSize, in: 20...60, step: 1)
                             Text("\(Int(tracker.cursorSize))")
                                 .font(.system(size: 12, weight: .medium, design: .monospaced))
                                 .foregroundStyle(.secondary)
@@ -105,7 +105,7 @@ struct CursorSettingsView: View {
                             .tracking(0.5)
 
                         HStack {
-                            Slider(value: $tracker.ringWidth, in: 1...15, step: 0.5)
+                            Slider(value: $tracker.ringWidth, in: 1...10, step: 0.5)
                             Text(String(format: "%.1f", tracker.ringWidth))
                                 .font(.system(size: 12, weight: .medium, design: .monospaced))
                                 .foregroundStyle(.secondary)
