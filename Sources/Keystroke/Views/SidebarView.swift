@@ -2,7 +2,7 @@ import SwiftUI
 
 struct SidebarView: View {
     @Binding var selectedItem: SidebarItem
-    @ObservedObject var tracker: MouseTracker
+    @ObservedObject var mouseTracker: MouseTracker
 
     var body: some View {
         VStack(spacing: 0) {

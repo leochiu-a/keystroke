@@ -1,39 +1,44 @@
 import SwiftUI
 
 struct OverlayView: View {
-    @ObservedObject var tracker: MouseTracker
+    @ObservedObject var mouseTracker: MouseTracker
+    @ObservedObject var keyPressTracker: KeyPressTracker
     let screenFrame: CGRect
 
     private var localCursorPosition: CGPoint {
         CoordinateHelper.screenPointToOverlay(
-            mouseLocation: tracker.cursorPosition,
+            mouseLocation: mouseTracker.cursorPosition,
             overlayFrame: screenFrame
         )
     }
 
     private var isCursorOnThisScreen: Bool {
         CoordinateHelper.isPointOnScreen(
-            mouseLocation: tracker.cursorPosition,
+            mouseLocation: mouseTracker.cursorPosition,
             screenFrame: screenFrame
         )
     }
 
     var body: some View {
         ZStack {
-            if tracker.isEnabled && isCursorOnThisScreen {
-                CursorGlowView(position: localCursorPosition, color: tracker.glowColor, style: tracker.highlightStyle)
+            if mouseTracker.isEnabled && isCursorOnThisScreen {
+                CursorGlowView(position: localCursorPosition, color: mouseTracker.glowColor, style: mouseTracker.highlightStyle)
 
-                ForEach(tracker.clicks) { click in
+                ForEach(mouseTracker.clicks) { click in
                     if CoordinateHelper.isPointOnScreen(mouseLocation: click.position, screenFrame: screenFrame) {
                         RippleView(
                             position: CoordinateHelper.screenPointToOverlay(
                                 mouseLocation: click.position,
                                 overlayFrame: screenFrame
                             ),
-                            onComplete: { tracker.removeClick(id: click.id) }
+                            onComplete: { mouseTracker.removeClick(id: click.id) }
                         )
                     }
                 }
+            }
+
+            if keyPressTracker.isEnabled {
+                KeyPressOverlayView(tracker: keyPressTracker, screenHeight: screenFrame.height)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

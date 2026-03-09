@@ -6,15 +6,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     var overlayWindows: [NSWindow] = []
     var mainWindow: NSWindow?
     let mouseTracker = MouseTracker()
+    let keyPressTracker = KeyPressTracker()
     var globalMouseMovedMonitor: Any?
     var localMouseMovedMonitor: Any?
     var globalMouseClickMonitor: Any?
     var localMouseClickMonitor: Any?
+    var globalKeyDownMonitor: Any?
+    var localKeyDownMonitor: Any?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.regular)
         setupOverlayWindows()
         setupMouseMonitors()
+        setupKeyboardMonitors()
         setupMainWindow()
     }
 
@@ -32,7 +36,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             window.ignoresMouseEvents = true
             window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
             window.contentView = NSHostingView(
-                rootView: OverlayView(tracker: mouseTracker, screenFrame: screen.frame)
+                rootView: OverlayView(
+                    mouseTracker: mouseTracker,
+                    keyPressTracker: keyPressTracker,
+                    screenFrame: screen.frame
+                )
             )
             window.setFrame(screen.frame, display: true)
             window.orderFrontRegardless()
@@ -72,8 +80,29 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    private func setupKeyboardMonitors() {
+        let tracker = keyPressTracker
+
+        let handleKeyDown: (NSEvent) -> Void = { event in
+            MainActor.assumeIsolated {
+                let formatted = KeyPressTracker.formatKeyEvent(
+                    characters: event.charactersIgnoringModifiers ?? "",
+                    keyCode: event.keyCode,
+                    modifiers: event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+                )
+                tracker.addKeyPress(characters: formatted)
+            }
+        }
+
+        globalKeyDownMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown, handler: handleKeyDown)
+        localKeyDownMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+            handleKeyDown(event)
+            return event
+        }
+    }
+
     private func setupMainWindow() {
-        let mainView = MainWindowView(tracker: mouseTracker)
+        let mainView = MainWindowView(mouseTracker: mouseTracker, keyPressTracker: keyPressTracker)
         let hostingView = NSHostingView(rootView: mainView)
 
         let window = NSWindow(
@@ -93,7 +122,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
-        for monitor in [globalMouseMovedMonitor, localMouseMovedMonitor, globalMouseClickMonitor, localMouseClickMonitor] {
+        for monitor in [globalMouseMovedMonitor, localMouseMovedMonitor, globalMouseClickMonitor, localMouseClickMonitor, globalKeyDownMonitor, localKeyDownMonitor] {
             if let monitor { NSEvent.removeMonitor(monitor) }
         }
     }
