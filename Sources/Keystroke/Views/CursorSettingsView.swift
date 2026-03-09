@@ -47,7 +47,8 @@ struct CursorSettingsView: View {
                                     color: tracker.glowColor,
                                     size: tracker.cursorSize,
                                     ringWidth: tracker.ringWidth,
-                                    glowRadius: tracker.glowRadius
+                                    glowRadius: tracker.glowRadius,
+                                    isClicking: false
                                 )
                             }
                         }
@@ -129,6 +130,26 @@ struct CursorSettingsView: View {
                                 .foregroundStyle(.secondary)
                                 .frame(width: 30, alignment: .trailing)
                         }
+                    }
+                }
+
+                // Ripple card
+                SettingsCard {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("RIPPLE")
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundStyle(.secondary)
+                                .tracking(0.5)
+                            Text("Show expanding ripple on click")
+                                .font(.system(size: 11))
+                                .foregroundStyle(.tertiary)
+                        }
+                        Spacer()
+                        Toggle("", isOn: $tracker.isRippleEnabled)
+                            .toggleStyle(.switch)
+                            .controlSize(.small)
+                            .labelsHidden()
                     }
                 }
             }

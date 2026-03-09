@@ -80,6 +80,24 @@ import Foundation
     #expect(tracker.ringWidth == 8.0)
 }
 
+// MARK: - Ripple and click state
+
+@Test @MainActor func isRippleEnabledDefaultValue() {
+    let tracker = MouseTracker()
+    #expect(tracker.isRippleEnabled == true)
+}
+
+@Test @MainActor func setIsRippleEnabled() {
+    let tracker = MouseTracker()
+    tracker.isRippleEnabled = false
+    #expect(tracker.isRippleEnabled == false)
+}
+
+@Test @MainActor func isClickingDefaultValue() {
+    let tracker = MouseTracker()
+    #expect(tracker.isClicking == false)
+}
+
 @Test @MainActor func glowRadiusDefaultValue() {
     let tracker = MouseTracker()
     #expect(tracker.glowRadius == 0.0)

@@ -11,6 +11,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     var localMouseMovedMonitor: Any?
     var globalMouseClickMonitor: Any?
     var localMouseClickMonitor: Any?
+    var globalMouseUpMonitor: Any?
+    var localMouseUpMonitor: Any?
     var globalKeyDownMonitor: Any?
     var localKeyDownMonitor: Any?
     var globalFlagsChangedMonitor: Any?
@@ -65,12 +67,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let handleClick: (NSEvent) -> Void = { _ in
             MainActor.assumeIsolated {
                 tracker.addClick(at: NSEvent.mouseLocation)
+                tracker.isClicking = true
+            }
+        }
+
+        let mouseUpEvents: NSEvent.EventTypeMask = [.leftMouseUp, .rightMouseUp]
+        let handleMouseUp: (NSEvent) -> Void = { _ in
+            MainActor.assumeIsolated {
+                tracker.isClicking = false
             }
         }
 
         // Global monitors: events from other apps
         globalMouseMovedMonitor = NSEvent.addGlobalMonitorForEvents(matching: moveEvents, handler: handleMove)
         globalMouseClickMonitor = NSEvent.addGlobalMonitorForEvents(matching: clickEvents, handler: handleClick)
+        globalMouseUpMonitor = NSEvent.addGlobalMonitorForEvents(matching: mouseUpEvents, handler: handleMouseUp)
 
         // Local monitors: events within our own app
         localMouseMovedMonitor = NSEvent.addLocalMonitorForEvents(matching: moveEvents) { event in
@@ -79,6 +90,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         localMouseClickMonitor = NSEvent.addLocalMonitorForEvents(matching: clickEvents) { event in
             handleClick(event)
+            return event
+        }
+        localMouseUpMonitor = NSEvent.addLocalMonitorForEvents(matching: mouseUpEvents) { event in
+            handleMouseUp(event)
             return event
         }
     }
@@ -143,7 +158,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
-        for monitor in [globalMouseMovedMonitor, localMouseMovedMonitor, globalMouseClickMonitor, localMouseClickMonitor, globalKeyDownMonitor, localKeyDownMonitor, globalFlagsChangedMonitor, localFlagsChangedMonitor] {
+        for monitor in [globalMouseMovedMonitor, localMouseMovedMonitor, globalMouseClickMonitor, localMouseClickMonitor, globalMouseUpMonitor, localMouseUpMonitor, globalKeyDownMonitor, localKeyDownMonitor, globalFlagsChangedMonitor, localFlagsChangedMonitor] {
             if let monitor { NSEvent.removeMonitor(monitor) }
         }
     }

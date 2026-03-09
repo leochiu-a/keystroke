@@ -6,27 +6,35 @@ struct CursorGlowView: View {
     let size: CGFloat
     let ringWidth: CGFloat
     let glowRadius: CGFloat
+    let isClicking: Bool
+
+    private var displaySize: CGFloat {
+        isClicking ? size * 0.7 : size
+    }
 
     var body: some View {
         ZStack {
             if glowRadius > 0 {
+                let glowDisplaySize = isClicking ? (size * 0.7 + glowRadius * 2) : (size + glowRadius * 2)
+                let glowStartRadius = isClicking ? (size * 0.7 / 2) : (size / 2)
                 Circle()
                     .fill(
                         RadialGradient(
                             gradient: Gradient(colors: [color.opacity(0.5), color.opacity(0.0)]),
                             center: .center,
-                            startRadius: size / 2,
-                            endRadius: size / 2 + glowRadius
+                            startRadius: glowStartRadius,
+                            endRadius: glowStartRadius + glowRadius
                         )
                     )
-                    .frame(width: size + glowRadius * 2, height: size + glowRadius * 2)
+                    .frame(width: glowDisplaySize, height: glowDisplaySize)
             }
 
             Circle()
                 .stroke(color.opacity(0.7), lineWidth: ringWidth)
-                .frame(width: size, height: size)
+                .frame(width: displaySize, height: displaySize)
         }
         .position(position)
+        .animation(.easeOut(duration: 0.1), value: isClicking)
         .animation(nil, value: position)
         .allowsHitTesting(false)
     }

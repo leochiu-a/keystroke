@@ -9,6 +9,8 @@ final class MouseTracker: ObservableObject {
     @Published var cursorSize: CGFloat = 40.0
     @Published var ringWidth: CGFloat = 5.0
     @Published var glowRadius: CGFloat = 0.0
+    @Published var isRippleEnabled: Bool = true
+    @Published var isClicking: Bool = false
 
     func updatePosition(_ point: CGPoint) {
         guard isEnabled else { return }
