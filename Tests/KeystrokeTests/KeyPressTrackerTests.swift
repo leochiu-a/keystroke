@@ -99,3 +99,8 @@ import AppKit
     let result = KeyPressTracker.formatKeyEvent(characters: "", keyCode: 124, modifiers: [])
     #expect(result == "→")
 }
+
+@Test @MainActor func formatKeyEventForwardDelete() {
+    let result = KeyPressTracker.formatKeyEvent(characters: "", keyCode: 117, modifiers: [])
+    #expect(result == "⌦")
+}
