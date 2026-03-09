@@ -20,6 +20,8 @@ struct MainWindowView: View {
         switch selectedItem {
         case .cursor:
             CursorSettingsView(tracker: tracker)
+        case .keyPress:
+            Text("KeyPress settings coming soon")
         }
     }
 }

@@ -11,3 +11,9 @@ import Testing
     let defaultItem = SidebarItem.defaultItem
     #expect(defaultItem == .cursor)
 }
+
+@Test func sidebarItemHasKeyPressCase() {
+    let item = SidebarItem.keyPress
+    #expect(item.title == "KeyPress")
+    #expect(item.icon == "keyboard")
+}
