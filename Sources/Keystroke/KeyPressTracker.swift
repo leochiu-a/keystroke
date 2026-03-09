@@ -32,6 +32,19 @@ final class KeyPressTracker: ObservableObject {
         keyPresses.removeAll { $0.id == id }
     }
 
+    static func formatModifierChange(oldFlags: NSEvent.ModifierFlags, newFlags: NSEvent.ModifierFlags) -> String? {
+        let pressed = newFlags.subtracting(oldFlags)
+        if pressed.isEmpty { return nil }
+
+        var result = ""
+        if pressed.contains(.control) { result += "⌃" }
+        if pressed.contains(.option) { result += "⌥" }
+        if pressed.contains(.command) { result += "⌘" }
+        if pressed.contains(.shift) { result += "⇧" }
+
+        return result.isEmpty ? nil : result
+    }
+
     static func formatKeyEvent(characters: String, keyCode: UInt16, modifiers: NSEvent.ModifierFlags) -> String {
         let keyStr: String
         if let special = specialKeys[keyCode] {

@@ -104,3 +104,35 @@ import AppKit
     let result = KeyPressTracker.formatKeyEvent(characters: "", keyCode: 117, modifiers: [])
     #expect(result == "⌦")
 }
+
+// MARK: - Modifier-only key detection
+
+@Test @MainActor func formatModifierChangeCommand() {
+    let result = KeyPressTracker.formatModifierChange(oldFlags: [], newFlags: .command)
+    #expect(result == "⌘")
+}
+
+@Test @MainActor func formatModifierChangeShift() {
+    let result = KeyPressTracker.formatModifierChange(oldFlags: [], newFlags: .shift)
+    #expect(result == "⇧")
+}
+
+@Test @MainActor func formatModifierChangeOption() {
+    let result = KeyPressTracker.formatModifierChange(oldFlags: [], newFlags: .option)
+    #expect(result == "⌥")
+}
+
+@Test @MainActor func formatModifierChangeControl() {
+    let result = KeyPressTracker.formatModifierChange(oldFlags: [], newFlags: .control)
+    #expect(result == "⌃")
+}
+
+@Test @MainActor func formatModifierChangeReleaseReturnsNil() {
+    let result = KeyPressTracker.formatModifierChange(oldFlags: .command, newFlags: [])
+    #expect(result == nil)
+}
+
+@Test @MainActor func formatModifierChangeMultipleNewModifiers() {
+    let result = KeyPressTracker.formatModifierChange(oldFlags: .command, newFlags: [.command, .shift])
+    #expect(result == "⇧")
+}

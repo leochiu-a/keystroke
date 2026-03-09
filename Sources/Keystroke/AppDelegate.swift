@@ -13,6 +13,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     var localMouseClickMonitor: Any?
     var globalKeyDownMonitor: Any?
     var localKeyDownMonitor: Any?
+    var globalFlagsChangedMonitor: Any?
+    var localFlagsChangedMonitor: Any?
+    var previousModifierFlags: NSEvent.ModifierFlags = []
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.regular)
@@ -94,9 +97,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
+        let handleFlagsChanged: (NSEvent) -> Void = { [weak self] event in
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                let newFlags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+                if let formatted = KeyPressTracker.formatModifierChange(oldFlags: self.previousModifierFlags, newFlags: newFlags) {
+                    tracker.addKeyPress(characters: formatted)
+                }
+                self.previousModifierFlags = newFlags
+            }
+        }
+
         globalKeyDownMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown, handler: handleKeyDown)
         localKeyDownMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
             handleKeyDown(event)
+            return event
+        }
+        globalFlagsChangedMonitor = NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged, handler: handleFlagsChanged)
+        localFlagsChangedMonitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { event in
+            handleFlagsChanged(event)
             return event
         }
     }
@@ -122,7 +141,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
-        for monitor in [globalMouseMovedMonitor, localMouseMovedMonitor, globalMouseClickMonitor, localMouseClickMonitor, globalKeyDownMonitor, localKeyDownMonitor] {
+        for monitor in [globalMouseMovedMonitor, localMouseMovedMonitor, globalMouseClickMonitor, localMouseClickMonitor, globalKeyDownMonitor, localKeyDownMonitor, globalFlagsChangedMonitor, localFlagsChangedMonitor] {
             if let monitor { NSEvent.removeMonitor(monitor) }
         }
     }
