@@ -6,7 +6,7 @@ struct CursorSettingsView: View {
     private let colors: [(String, Color)] = [
         ("Yellow", .yellow),
         ("Blue", .blue),
-        ("Green", .green),
+        ("Green", Color(red: 0.2, green: 1.0, blue: 0.2)),
         ("Pink", .pink),
         ("White", .white),
     ]

@@ -5,7 +5,7 @@ final class MouseTracker: ObservableObject {
     @Published var cursorPosition: CGPoint = .zero
     @Published var clicks: [ClickEvent] = []
     @Published var isEnabled: Bool = true
-    @Published var glowColor: Color = .green
+    @Published var glowColor: Color = Color(red: 0.2, green: 1.0, blue: 0.2)
     @Published var cursorSize: CGFloat = 40.0
     @Published var ringWidth: CGFloat = 5.0
     @Published var glowRadius: CGFloat = 0.0
