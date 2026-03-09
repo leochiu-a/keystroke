@@ -36,9 +36,9 @@ struct KeyPressSettingsView: View {
                                 .frame(height: 100)
 
                             HStack(spacing: 6) {
-                                KeyPreviewCapsule(text: "⌘")
-                                KeyPreviewCapsule(text: "⇧")
-                                KeyPreviewCapsule(text: "S")
+                                KeyPreviewCapsule(symbol: "⌘", label: "command")
+                                KeyPreviewCapsule(symbol: "⇧", label: "shift")
+                                KeyPreviewCapsule(character: "S")
                             }
                         }
                     }
@@ -51,17 +51,53 @@ struct KeyPressSettingsView: View {
 }
 
 private struct KeyPreviewCapsule: View {
-    let text: String
+    let symbol: String
+    let label: String?
+
+    init(symbol: String, label: String) {
+        self.symbol = symbol
+        self.label = label
+    }
+
+    init(character: String) {
+        self.symbol = character
+        self.label = nil
+    }
 
     var body: some View {
-        Text(text)
-            .font(.system(size: 20, weight: .medium, design: .rounded))
-            .foregroundStyle(.white)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 8)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.black.opacity(0.7))
-            )
+        Group {
+            if let label {
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack {
+                        Spacer()
+                        Text(symbol)
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundStyle(.white.opacity(0.9))
+                    }
+                    Text(label)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.8))
+                }
+                .frame(width: 64, height: 52)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 6)
+            } else {
+                Text(symbol)
+                    .font(.system(size: 22, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white)
+                    .frame(minWidth: 44, minHeight: 52)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 6)
+            }
+        }
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color(white: 0.2))
+                .shadow(color: .black.opacity(0.4), radius: 1, y: 1)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(Color.white.opacity(0.15), lineWidth: 0.5)
+        )
     }
 }
