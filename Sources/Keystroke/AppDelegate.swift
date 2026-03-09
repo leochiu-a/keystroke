@@ -41,9 +41,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func setupMouseMonitors() {
         let tracker = mouseTracker
 
-        mouseMovedMonitor = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { _ in
+        mouseMovedMonitor = NSEvent.addGlobalMonitorForEvents(
+            matching: [.mouseMoved, .leftMouseDragged, .rightMouseDragged, .otherMouseDragged]
+        ) { _ in
             let mouseLocation = NSEvent.mouseLocation
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 tracker.updatePosition(mouseLocation)
             }
         }
@@ -52,7 +54,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             matching: [.leftMouseDown, .rightMouseDown]
         ) { _ in
             let mouseLocation = NSEvent.mouseLocation
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 tracker.addClick(at: mouseLocation)
             }
         }
