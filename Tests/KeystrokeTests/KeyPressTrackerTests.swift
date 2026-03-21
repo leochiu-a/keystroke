@@ -148,11 +148,21 @@ import AppKit
     #expect(tracker.keyPresses[2].characters == "A")
 }
 
-@Test @MainActor func addDuplicateModifierIsIgnored() {
+@Test @MainActor func doubleTapModifierShowsBothPresses() {
     let tracker = KeyPressTracker()
     tracker.addKeyPress(characters: "⌘", label: "command")
     tracker.addKeyPress(characters: "⌘", label: "command")
-    #expect(tracker.keyPresses.count == 1)
+    #expect(tracker.keyPresses.count == 2)
+    #expect(tracker.keyPresses[0].characters == "⌘")
+    #expect(tracker.keyPresses[1].characters == "⌘")
+}
+
+@Test @MainActor func doubleTapModifierIncrementsGenerationForFadeReset() {
+    let tracker = KeyPressTracker()
+    tracker.addKeyPress(characters: "⌥", label: "option")
+    let genBefore = tracker.generation
+    tracker.addKeyPress(characters: "⌥", label: "option")
+    #expect(tracker.generation == genBefore + 1)
 }
 
 @Test @MainActor func newModifierAfterRegularKeyClearsPrevious() {

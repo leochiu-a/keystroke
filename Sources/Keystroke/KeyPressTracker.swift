@@ -51,7 +51,7 @@ final class KeyPressTracker: ObservableObject {
         }
 
         if isModifier && keyPresses.contains(where: { $0.characters == characters }) {
-            return
+            generation += 1
         }
 
         keyPresses.append(KeyPressEvent(characters: characters, label: label))
