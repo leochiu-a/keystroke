@@ -3,39 +3,65 @@ import SwiftUI
 struct KeyPressOverlayView: View {
     @ObservedObject var tracker: KeyPressTracker
 
+    @State private var opacity: Double = 1.0
+    @State private var currentGeneration: Int = 0
+    @State private var fadeWork: DispatchWorkItem?
+
     var body: some View {
         VStack {
             Spacer()
 
-            HStack(spacing: 6) {
-                ForEach(tracker.keyPresses) { keyPress in
-                    KeyCapsuleView(keyPress: keyPress) {
-                        tracker.removeKeyPress(id: keyPress.id)
+            if !tracker.keyPresses.isEmpty {
+                HStack(spacing: 6) {
+                    ForEach(tracker.keyPresses) { keyPress in
+                        KeyCapsuleView(keyPress: keyPress)
                     }
                 }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color(white: 0.85).opacity(0.9))
+                )
+                .padding(.bottom, 60)
+                .opacity(opacity)
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(.ultraThinMaterial)
-            )
-            .padding(.bottom, 60)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .allowsHitTesting(false)
+        .onChange(of: tracker.generation) { _, newGen in
+            // New group arrived — reset opacity and restart fade timer
+            fadeWork?.cancel()
+            opacity = 1.0
+            currentGeneration = newGen
+            scheduleFadeOut()
+        }
+        .onChange(of: tracker.keyPresses.count) { oldCount, newCount in
+            if oldCount == 0 && newCount > 0 {
+                // First keys appeared (no generation change needed)
+                fadeWork?.cancel()
+                opacity = 1.0
+                scheduleFadeOut()
+            }
+        }
+    }
+
+    private func scheduleFadeOut() {
+        let work = DispatchWorkItem { [self] in
+            withAnimation(.easeOut(duration: 0.5)) {
+                opacity = 0.0
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+                tracker.keyPresses.removeAll()
+            }
+        }
+        fadeWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5, execute: work)
     }
 }
 
 private struct KeyCapsuleView: View {
     let keyPress: KeyPressEvent
-    let onComplete: () -> Void
-
-    @State private var opacity: Double = 1.0
-
-    private var isModifier: Bool {
-        keyPress.label != nil
-    }
 
     var body: some View {
         Group {
@@ -66,25 +92,32 @@ private struct KeyCapsuleView: View {
             }
         }
         .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color(white: 0.2))
-                .shadow(color: .black.opacity(0.4), radius: 1, y: 1)
+            ZStack {
+                // Bottom edge for 3D depth
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(white: 0.05))
+                    .offset(y: 3)
+
+                // Key face
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(white: 0.15))
+            }
+            .shadow(color: .black.opacity(0.5), radius: 3, y: 2)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 10)
-                .stroke(Color.white.opacity(0.15), lineWidth: 0.5)
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            Color.white.opacity(0.2),
+                            Color.white.opacity(0.05)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    ),
+                    lineWidth: 0.5
+                )
         )
-        .opacity(opacity)
         .allowsHitTesting(false)
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                withAnimation(.easeOut(duration: 0.5)) {
-                    opacity = 0.0
-                }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
-                    onComplete()
-                }
-            }
-        }
     }
 }

@@ -9,6 +9,7 @@ struct ModifierInfo {
 final class KeyPressTracker: ObservableObject {
     @Published var keyPresses: [KeyPressEvent] = []
     @Published var isEnabled: Bool = true
+    @Published var generation: Int = 0
 
     private static let specialKeys: [UInt16: String] = [
         36: "↩",    // Return
@@ -34,9 +35,24 @@ final class KeyPressTracker: ObservableObject {
 
     func addKeyPress(characters: String, label: String? = nil) {
         guard isEnabled else { return }
-        if keyPresses.count >= Self.maxVisibleKeyPresses {
-            keyPresses.removeFirst()
+
+        let isModifier = label != nil
+        let hasRegularKey = keyPresses.contains { $0.label == nil }
+
+        if hasRegularKey {
+            keyPresses.removeAll()
+            generation += 1
         }
+
+        if isModifier && !keyPresses.isEmpty && keyPresses.last?.label == nil {
+            keyPresses.removeAll()
+            generation += 1
+        }
+
+        if isModifier && keyPresses.contains(where: { $0.characters == characters }) {
+            return
+        }
+
         keyPresses.append(KeyPressEvent(characters: characters, label: label))
     }
 
@@ -55,19 +71,10 @@ final class KeyPressTracker: ObservableObject {
         return result.isEmpty ? nil : result
     }
 
-    static func formatKeyEvent(characters: String, keyCode: UInt16, modifiers: NSEvent.ModifierFlags) -> String {
-        let keyStr: String
+    static func formatKeyEvent(characters: String, keyCode: UInt16) -> String {
         if let special = specialKeys[keyCode] {
-            keyStr = special
-        } else {
-            keyStr = characters.uppercased()
+            return special
         }
-
-        var prefix = ""
-        for mod in self.modifiers where modifiers.contains(mod.flag) {
-            prefix += mod.symbol
-        }
-
-        return prefix + keyStr
+        return characters.uppercased()
     }
 }

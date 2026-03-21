@@ -15,6 +15,7 @@ build_and_run() {
         mkdir -p "$APP_BUNDLE/Contents/MacOS"
         cp .build/debug/Keystroke "$APP_EXEC"
         cp Resources/Info.plist "$APP_BUNDLE/Contents/Info.plist"
+        codesign --force --sign - --identifier com.keystroke.app "$APP_BUNDLE"
         echo "==> Launching..."
         open "$APP_BUNDLE"
     else

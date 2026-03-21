@@ -20,6 +20,16 @@ struct KeyPressSettingsView: View {
                     Text("Show keyboard input on screen")
                         .font(.system(size: 13))
                         .foregroundStyle(.secondary)
+
+                    if !AXIsProcessTrusted() {
+                        HStack(spacing: 4) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundStyle(.orange)
+                            Text("Accessibility permission required for key detection")
+                                .font(.system(size: 11))
+                                .foregroundStyle(.orange)
+                        }
+                    }
                 }
 
                 // Preview card
@@ -91,13 +101,31 @@ private struct KeyPreviewCapsule: View {
             }
         }
         .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color(white: 0.2))
-                .shadow(color: .black.opacity(0.4), radius: 1, y: 1)
+            ZStack {
+                // Bottom edge for 3D depth
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(white: 0.05))
+                    .offset(y: 3)
+
+                // Key face
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(white: 0.15))
+            }
+            .shadow(color: .black.opacity(0.5), radius: 3, y: 2)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 10)
-                .stroke(Color.white.opacity(0.15), lineWidth: 0.5)
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            Color.white.opacity(0.2),
+                            Color.white.opacity(0.05)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    ),
+                    lineWidth: 0.5
+                )
         )
     }
 }

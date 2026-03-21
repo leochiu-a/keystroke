@@ -30,7 +30,7 @@ struct CursorGlowView: View {
             }
 
             Circle()
-                .stroke(color.opacity(0.7), lineWidth: ringWidth)
+                .stroke(color, lineWidth: ringWidth)
                 .frame(width: displaySize, height: displaySize)
         }
         .position(position)

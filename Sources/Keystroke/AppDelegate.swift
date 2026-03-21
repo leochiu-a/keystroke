@@ -21,10 +21,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.regular)
+        requestAccessibilityIfNeeded()
         setupOverlayWindows()
         setupMouseMonitors()
         setupKeyboardMonitors()
         setupMainWindow()
+    }
+
+    private nonisolated func requestAccessibilityIfNeeded() {
+        let options = ["AXTrustedCheckOptionPrompt": true] as CFDictionary
+        AXIsProcessTrustedWithOptions(options)
     }
 
     private func setupOverlayWindows() {
@@ -105,8 +111,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             MainActor.assumeIsolated {
                 let formatted = KeyPressTracker.formatKeyEvent(
                     characters: event.charactersIgnoringModifiers ?? "",
-                    keyCode: event.keyCode,
-                    modifiers: event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+                    keyCode: event.keyCode
                 )
                 tracker.addKeyPress(characters: formatted)
             }
