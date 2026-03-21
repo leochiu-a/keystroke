@@ -229,3 +229,25 @@ import AppKit
     #expect(result?[1].symbol == "⇧")
     #expect(result?[1].label == "shift")
 }
+
+// MARK: - Empty character guard
+
+@Test @MainActor func addKeyPressIgnoresEmptyCharacters() {
+    let tracker = KeyPressTracker()
+    tracker.addKeyPress(characters: "")
+    #expect(tracker.keyPresses.isEmpty)
+}
+
+@Test @MainActor func emptyCharacterDoesNotPollutHasRegularKey() {
+    // Empty-string keys must not be treated as regular keys that block real keys
+    let tracker = KeyPressTracker()
+    tracker.addKeyPress(characters: "")  // simulates nil charactersIgnoringModifiers
+    tracker.addKeyPress(characters: "A")
+    #expect(tracker.keyPresses.count == 1)
+    #expect(tracker.keyPresses.first?.characters == "A")
+}
+
+@Test @MainActor func formatKeyEventEmptyCharactersNonSpecialKeyReturnsEmpty() {
+    let result = KeyPressTracker.formatKeyEvent(characters: "", keyCode: 0)
+    #expect(result == "")
+}

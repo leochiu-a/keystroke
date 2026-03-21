@@ -35,6 +35,7 @@ final class KeyPressTracker: ObservableObject {
 
     func addKeyPress(characters: String, label: String? = nil) {
         guard isEnabled else { return }
+        guard !characters.isEmpty else { return }
 
         let isModifier = label != nil
         let hasRegularKey = keyPresses.contains { $0.label == nil }
